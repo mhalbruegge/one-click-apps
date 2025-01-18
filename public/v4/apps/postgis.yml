@@ -1,0 +1,50 @@
+captainVersion: 4
+services:
+    $$cap_appname:
+        image: postgis/postgis:$$cap_postgis_version
+        volumes:
+            - $$cap_appname-data:/var/lib/postgresql/data
+        restart: always
+        environment:
+            POSTGRES_USER: $$cap_pg_user
+            POSTGRES_PASSWORD: $$cap_pg_pass
+            POSTGRES_DB: $$cap_pg_db
+            POSTGRES_INITDB_ARGS: $$cap_pg_initdb_args
+        caproverExtra:
+            notExposeAsWebApp: 'true'
+caproverOneClickApp:
+    variables:
+        - id: $$cap_postgis_version
+          label: PostGIS Version
+          defaultValue: '17-3.5'
+          description: Check out their Docker page for valid tags https://hub.docker.com/r/postgis/postgis/tags
+          validRegex: /^([^\s^\/])+$/
+        - id: $$cap_pg_user
+          label: Username
+          defaultValue: postgis
+          validRegex: /.{1,}/
+        - id: $$cap_pg_pass
+          label: Password
+          defaultValue: $$cap_gen_random_hex(16)
+          validRegex: /.{1,}/
+        - id: $$cap_pg_db
+          label: Default Database
+          defaultValue: postgis
+          validRegex: /.{1,}/
+        - id: $$cap_pg_initdb_args
+          label: Optional Arguments
+          description: >-
+              Arguments will be appended to `postgres initdb`.
+              Example: `--data-checksums`.
+          validRegex: /.{0,}/
+    instructions:
+        start: |-
+            PostGIS is an extension to PostgreSQL that allows GIS (Geographic Information Systems) objects to be stored in the database.
+            It provides support for spatial data types and spatial indexes, as well as various spatial functions for querying and analyzing geospatial data.
+        end: |-
+            PostGIS is deployed and available as `srv-captain--$$cap_appname:5432` to other apps.
+            For example, with Node.js: `const client = new Client({ user: '$$cap_pg_user', host: 'srv-captain--$$cap_appname', database: '$$cap_pg_db', password: '$$cap_pg_pass', port: 5432})`
+    displayName: PostGIS
+    isOfficial: false
+    description: PostGIS adds spatial database capabilities to PostgreSQL, enabling geospatial data handling and queries.
+    documentation: https://postgis.net/docs/
